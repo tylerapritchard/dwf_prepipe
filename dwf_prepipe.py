@@ -1,4 +1,5 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python3
+#example usage ./dwf_prepipe.py /projects/p025_swin/fstars/DWF_Unpack_Test/push/
 
 import os, time
 import sys
@@ -7,29 +8,32 @@ import argparse
 import warnings
 import multiprocessing
 import subprocess
-import pyfits
+import astropy.io.fits as pyfits
 
 def dwf_prepipe_unpack(file_name,push_path,untar_path,qsub_path,processes):
-	subprocess.run(['tar','-xvf',push_path+file_name,'-C',untar_path])
-
+	ccdlist=['38','24','14','56','7','33','11','5','34','58','10','41','16','54','17','18','27','2','3','30','22','23','21','43','6','37','25','19','36','44','32','26','4','15','29','50','12','13','1','42','48','52','55','31','20','59','39','57','53','9','28','35','8','46','45','49','40','51','47']
 	DECam_Root=file_name.split('.')[0]
+
+	print('Unpacking:'+file_name)
+	subprocess.run(['tar','-xf',push_path+file_name,'-C',untar_path])
+
 	Exposure=DECam_Root.split('_')[1]
 
 	infoname=untar_path+DECam_Root+'_fileinfo.fits'
-	j2fpath='/lustre/projects/p025_swin/dvohl/kerlumph_7_4_decam/bin/Linux-x86-64-gcc/'
 	subprocess.run(['j2f','-i',untar_path+DECam_Root+'_1.jp2','-o',infoname])
-	#subprocess.run(j2f+'j2f -i '+untar_path+DECam_Root+'_1.jp2 -o '+infoname, shell=True)
-	exp=pyfits.getval( filename+'[1]',"EXPNUM")
-	Field=pyfits.getval(infoname+'[1]',"OBJECT")
-	Filter=pyfits.getval( filename+'[1]',"FILTER")[0]
-	ut='ut'+pyfits.getval( filename+'[1]',"OBSID")[6:12]
-	mjd=pyfits.getval(filename+'[1]',"MJD-OBS")
-	date=pyfits.getval(filename+'[1]',"DATE-OBS")
-	print(Field+'.'+Filter+'.'+UT+'.'+EXP+'.'+UT+'_')
-	#Filename_Root=
-	#placeholder
-	#untar file: tar -xf DECam_00504634.tar -C untar/
+
+	exp=pyfits.getval(infoname,"EXPNUM")
+	Field=pyfits.getval(infoname,"OBJECT")
+	Filter=pyfits.getval(infoname,"FILTER")[0]
+	ut='ut'+pyfits.getval(infoname,"OBSID")[6:12]
+	mjd=pyfits.getval(infoname,"MJD-OBS")
+	date=pyfits.getval(infoname,"DATE-OBS")
+
+	process_root=Field+'.'+Filter+'.'+ut+'.'+str(exp)
+	print('Processing:'+process_root)
+
 	#parrallel ccd script write
+	ccd_files=process_root.join(ccdlist)
 	#pool = multiprocessing.Pool(processes=processes)
 	#pool.map(dwf_prepipe_qsubccd,ccd_files)
 	#pool.close()
@@ -48,7 +52,7 @@ def dwf_prepipe_processccd(file_name):
 	#Call Pipeloop
 	#Diagnose & Fix Pipeloop
 
-DWF_Push = '/lustre/projects/p025_swin/tap/DWF_Unpack_Test/push/' #"/lustre/projects/p025_swin/pipes/DWF_PIPE/CTIO_PUSH/"
+DWF_Push = '/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/' #"/lustre/projects/p025_swin/pipes/DWF_PIPE/CTIO_PUSH/"
 
 parser = argparse.ArgumentParser(description='Handle File Ingests for the DWF pipeline', formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('push_dir',metavar='DIRECTORY',type=str,default=DWF_Push,
@@ -62,18 +66,21 @@ path_to_untar = args.push_dir+'untar/'
 path_to_qsub = args.push_dir+'qsub/'
 before = dict ([(f, None) for f in os.listdir (path_to_watch)])
 
-while 1:
-  time.sleep (10)
-  after = dict ([(f, None) for f in os.listdir (path_to_watch)])
-  added = [f for f in after if not f in before]
-  removed = [f for f in before if not f in after]
-  if added: print("Added: ", ", ".join (added))
-  if removed: print("Removed: ", ", ".join (removed))
-  for f in added:  
-  	print('Unpacking: '+f)
-  	dwf_prepipe_unpack(f,path_to_watch,path_to_untar,path_to_qsub,args.processes)
 
-  before = after
+dwf_prepipe_unpack('DECam_00504110.tar',path_to_watch,path_to_untar,path_to_qsub,args.processes)
+
+#while 1:
+#  after = dict ([(f, None) for f in os.listdir (path_to_watch)])
+#  added = [f for f in after if not f in before]
+#  removed = [f for f in before if not f in after]
+#  if added: print("Added: ", ", ".join (added))
+#  if removed: print("Removed: ", ", ".join (removed))
+#  for f in added:  
+#  	dwf_prepipe_unpack(f,path_to_watch,path_to_untar,path_to_qsub,args.processes)
+
+#  before = after
+#  time.sleep (5)
+
 
 
 
