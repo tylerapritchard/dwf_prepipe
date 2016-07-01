@@ -59,9 +59,9 @@ print('And moving to: '+dest_dir)
 shutil.move(uncompressed_fits,dest_dir+newname)
 
 #Call Pipeloop for default CCD reduction
-subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-im',newname])
+subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-redobad'])#,'-im',newname])
 
 #Remove unescessary .jp2
 print('Deleting: '+untar_path+file_name)
-#subprocess.run(['rm ',untar_path+file_name])
+subprocess.run(['rm',untar_path+file_name])
 
