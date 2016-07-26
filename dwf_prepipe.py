@@ -14,6 +14,7 @@ import astropy.io.fits as pyfits
 #Uncompress new file + create & submit assosciated qsub scripts
 def dwf_prepipe_unpack(file_name,push_path,untar_path,qsub_path):
 	ccdlist=['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59']
+	#Truncated CCD list for testing
 	#ccdlist=['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'] #truncated version for test
 	
 	DECam_Root=file_name.split('.')[0]
@@ -26,7 +27,6 @@ def dwf_prepipe_unpack(file_name,push_path,untar_path,qsub_path):
 
 	#Create Qsub scripts for new file with n_per_ccd jobs per script
 	n_per_ccd=15
-	#truncated since background submission not working
 	n_scripts=math.ceil(len(ccdlist)/n_per_ccd)
 	print('Writing '+str(n_scripts)+' qsub scripts for '+file_name)
 	for n in range(n_scripts):
@@ -79,7 +79,6 @@ def dwf_prepipe_qsubccds(filename_root,qroot,ccds,qsub_path,push_path):
 
 	qsub_file.close()
 	subprocess.run(['qsub',qsub_name])
-	#placeholder
 
 DWF_Push = '/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/' #"/lustre/projects/p025_swin/pipes/DWF_PIPE/CTIO_PUSH/"
 
@@ -95,19 +94,18 @@ path_to_untar = args.push_dir+'untar/'
 path_to_qsub = args.push_dir+'qsub/'
 before = dict ([(f, None) for f in os.listdir (path_to_watch)])
 
-dwf_prepipe_unpack('DECam_00504110.tar',path_to_watch,path_to_untar,path_to_qsub)
-
-#while 1:
-#  after = dict ([(f, None) for f in os.listdir (path_to_watch)])
-#  added = [f for f in after if not f in before]
-#  removed = [f for f in before if not f in after]
-#  if added: print("Added: ", ", ".join (added))
-#  if removed: print("Removed: ", ", ".join (removed))
-#  for f in added:  
-#  	dwf_prepipe_unpack(f,path_to_watch,path_to_untar,path_to_qsub)
-
-#  before = after
-#  time.sleep (5)
+#dwf_prepipe_unpack('DECam_00504110.tar',path_to_watch,path_to_untar,path_to_qsub)
+print('Monitoring Directory:'+path_to_watch)
+while 1:
+  after = dict ([(f, None) for f in os.listdir (path_to_watch)])
+  added = [f for f in after if not f in before]
+  removed = [f for f in before if not f in after]
+  if added: print("Added: ", ", ".join (added))
+  if removed: print("Removed: ", ", ".join (removed))
+  for f in added: 
+  	dwf_prepipe_unpack(f,path_to_watch,path_to_untar,path_to_qsub)
+  before = after
+  time.sleep (5)
 
 
 

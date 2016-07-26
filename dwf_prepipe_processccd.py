@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 
 import os
 import shutil
@@ -26,15 +26,20 @@ DECam_Root=file_name.split('.')[0]
 ccd_num=DECam_Root.split('_')[2]
 uncompressed_fits=untar_path+DECam_Root+'.fits'
 print('Uncompressing: '+file_name+' in path: '+untar_path)
-subprocess.run(['j2f','-i',untar_path+file_name,'-o',uncompressed_fits])
+subprocess.run(['j2f','-i',untar_path+file_name,'-o',uncompressed_fits,'-num_threads',str(1)])
 
 #Extract nescessary information from file for naming scheme
 exp=pyfits.getval(uncompressed_fits,"EXPNUM")
 Field=pyfits.getval(uncompressed_fits,"OBJECT")
 Filter=pyfits.getval(uncompressed_fits,"FILTER")[0]
 ut='ut'+pyfits.getval(uncompressed_fits,"OBSID")[6:12]
+obstype=pyfits.getval(uncompressed_fits,"OBSTYPE")
 
 newname=Field+'.'+Filter+'.'+ut+'.'+str(exp)+'_'+ccd_num+'.fits'
+if((obstype == 'dome flat') or (obstype == 'domeflat')):
+	newname='domeflat.'+Filter+'.'+ut+'.'+str(exp)+'_'+ccd_num+'.fits'
+if((obstype == 'zero') or (obstype == 'bias')):
+	newname='bias.'+ut+'.'+str(exp)+'_'+ccd_num+'.fits'
 
 ut_dir=photepipe_rawdir+ut+'/'
 dest_dir=ut_dir+ccd_num+'/'
@@ -59,7 +64,7 @@ print('And moving to: '+dest_dir)
 shutil.move(uncompressed_fits,dest_dir+newname)
 
 #Call Pipeloop for default CCD reduction
-subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-redobad'])#,'-im',newname])
+subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp)])
 
 #Remove unescessary .jp2
 print('Deleting: '+untar_path+file_name)
