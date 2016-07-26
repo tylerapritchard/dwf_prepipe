@@ -111,10 +111,12 @@ print('Monitoring:'+path_to_watch)
 before = dict ([(f, None) for f in glob.glob(path_to_watch+'*.fits.fz')])
 
 while 1:
+
 	after = dict ([(f, None) for f in glob.glob(path_to_watch+'*.fits.fz')])
 	added = [f for f in after if not f in before]
 	removed = [f for f in before if not f in after]
 	
+	print(after)
 	if added: print("Added: ", ", ".join (added))
 	if removed: print("Removed: ", ", ".join (removed))
 	
