@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 #example usage ./dwf_prepipe.py /projects/p025_swin/fstars/DWF_Unpack_Test/push/
-
 import os, time
 import math
 import sys
 import glob
 import warnings
-import multiprocessing
+import argparse
 import subprocess
-import astropy.io.fits as pyfits
 
+#Process New Raw fits file & Ship to g2
 def dwf_prepipe_pushfile(file_name,data_dir,Qs):
 	file_name=file_name.split('/')[-1].split('.')[0]
 
@@ -27,19 +26,34 @@ def dwf_prepipe_pushfile(file_name,data_dir,Qs):
 	if not os.path.isdir(jp2_dir+file_name): 
 		print('Creating Directory: '+jp2_dir+file_name)	
 		os.makedirs(jp2_dir+file_name)
+	
 	print('Compressing:'+file_name)
 	subprocess.run(['f2j','-i',data_dir+file_name+'.fits','-o',jp2_dir+file_name+'/'+file_name+'.jp2','Qstep='+str(Qs),'-num_threads',str(1)])
+	
 	print('Packaging:'+jp2_dir+file_name+'.tar')
 	subprocess.run(['tar','-cf',jp2_dir+file_name+'.tar','-C',jp2_dir+file_name+'/','.'])
+	
 	print('Shipping:'+jp2_dir+file_name+'.tar')
-	#subprocess.Popen(['scp',jp2_dir+file_name+'.tar',reciever+':'+push_dir,';','ssh',reciever,"'mv "+push_dir+file_name+".tar "+target_dir+"'"])
 	command="scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"'"
-	#print(command)
 	subprocess.Popen(command,shell=True)
 	print('Returning to watch directory')
 
-path_to_watch = "/home4/images/fits/2016A-0095/"
-Qs=0.0000001#0.000038
+#Input Keyword Default Values
+DWF_PID = "/home4/images/fits/2016A-0095/"
+Qs_Def=0.000038
+
+#Parse Inputs
+parser = argparse.ArgumentParser(description='DWF_Prepipe push script for raw data from CTIO', formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument('-d','--data_dir',metavar='DIRECTORY',type=str,default=DWF_PID,
+	help='Directory where tarballs of compressed files are placed')
+parser.add_argument('-q','--Qs',metavar='DIRECTORY',type=float,default=Qs_Def,
+	help='Qstep for fits2jpeg compression')
+args = parser.parse_args()
+
+path_to_watch=args.data_dir
+Qs=args.Qs
+
+#Begin Monitoring Directory
 print('Monitoring:'+path_to_watch)
 before = dict ([(f, None) for f in glob.glob(path_to_watch+'*.fits.fz')])
 while 1:
@@ -49,7 +63,7 @@ while 1:
   if added: print("Added: ", ", ".join (added))
   if removed: print("Removed: ", ", ".join (removed))
   for f in added: 
-  	time.sleep(10 )
+  	time.sleep(10) #Make sure file finishes writing
   	dwf_prepipe_pushfile(f,path_to_watch,Qs)
   before = after
   time.sleep (2)
