@@ -17,19 +17,19 @@ def dwf_prepipe_validatefits(file_name,data_dir):
 		try:
 			test=pyfits.open(file_name)
 		except OSError:
-			print('OS')
+			print('OS Error:')
 			print(file_name+' still writing ...')
 			time.sleep(3)
 		except UserWarning:
-			print('user')
+			print('User Warning: ')
 			print(file_name+' still writing ...')
 			time.sleep(0.5)
 		except IOError:
-			print('io')
+			print('IO Error:')
 			print(file_name+' still writing ...')
 			time.sleep(0.5)
 		else:
-			print('pass')
+			print(file_name+' pass!')
 			valid=1
 
 #Package new raw .fits.fz file 
@@ -87,7 +87,7 @@ def dwf_prepipe_serial_pushfile(file,data_dir):
 DWF_PID = "/home4/images/fits/2016A-0095/"
 Qs_Def=0.000038
 method_def='p'
-nbundle_def=4
+nbundle_def=3
 
 #Parse Inputs
 parser = argparse.ArgumentParser(description='DWF_Prepipe push script for raw data from CTIO', formatter_class=argparse.RawDescriptionHelpFormatter)
