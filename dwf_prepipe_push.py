@@ -87,7 +87,7 @@ def dwf_prepipe_serial_pushfile(file,data_dir):
 DWF_PID = "/home4/images/fits/2016A-0095/"
 Qs_Def=0.000038
 method_def='p'
-nbundle_def=3
+nbundle_def=4
 
 #Parse Inputs
 parser = argparse.ArgumentParser(description='DWF_Prepipe push script for raw data from CTIO', formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -125,14 +125,14 @@ while 1:
 			dwf_prepipe_parallel_pushfile(f,path_to_watch)
 
 	if ((method == 's') and added):
-		dwf_prepipe_validatefits(f,path_to_watch)
+		dwf_prepipe_validatefits(added[-1],path_to_watch)
 		print('Processing: '+added[-1])
 		dwf_prepipe_packagefile(added[-1],path_to_watch,Qs)
 		dwf_prepipe_serial_pushfile(added[-1],path_to_watch)
 	
 	if ((method == 'b') and added):
+		added.sort()		
 		if(len(added) > nbundle):
-			added.sort()
 			bundle=added[-1*nbundle:]
 		else:
 			bundle=added
