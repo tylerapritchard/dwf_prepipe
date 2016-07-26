@@ -97,7 +97,7 @@ parser.add_argument('-q','--Qs',metavar='DIRECTORY',type=float,default=Qs_Def,
 	help='Qstep for fits2jpeg compression')
 parser.add_argument('--method',metavar='PROTOCOL',type=str,default=method_def,
 	help='File Transfer method:(s)erial, (p)arrallel, (b)undle, (l)ist')
-parser.add_argument('--nbundle',metavar='NUMBER',type=str,default=nbundle_def,
+parser.add_argument('--nbundle',metavar='NUMBER',type=int,default=nbundle_def,
 	help='Number of Files to bundle together')
 
 args = parser.parse_args()
