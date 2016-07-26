@@ -129,7 +129,7 @@ while 1:
 			bundle=added[-1*nbundle:]
 		else:
 			bundle=added
-		print('Bundling:'+bundle)
+		print(['Bundling:'+str(f) for f in bundle])
 		for f in bundle: 
 			print('Processing: '+f)
 			dwf_prepipe_validatefits(f,path_to_watch)
