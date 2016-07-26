@@ -24,10 +24,10 @@ def dwf_prepipe_validatefits(file_name,data_dir):
 			print('user')
 			print(file_name+' still writing ...')
 			time.sleep(0.5)
-		except IOError:
-			print('io')
-			print(file_name+' still writing ...')
-			time.sleep(0.5)
+		#except IOError:
+		#	print('io')
+		#	print(file_name+' still writing ...')
+		#	time.sleep(0.5)
 		else:
 			print('pass')
 			valid=1
