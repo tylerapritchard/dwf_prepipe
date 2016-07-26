@@ -16,18 +16,18 @@ def dwf_prepipe_validatefits(file_name,data_dir):
 	while(not valid):
 		try:
 			test=pyfits.open(data_dir+file_name+'.fits.fz')
-		except OSError:
-			print('OS')
-			print(file_name+' still writing ...')
-			time.sleep(3)
+		#except OSError:
+		#	print('OS')
+		#	print(file_name+' still writing ...')
+		#	time.sleep(3)
 		except UserWarning:
 			print('user')
 			print(file_name+' still writing ...')
-			time.sleep(3)
+			time.sleep(0.5)
 		except IOError:
 			print('io')
 			print(file_name+' still writing ...')
-			time.sleep(3)
+			time.sleep(0.5)
 		else:
 			print('pass')
 			valid=1
