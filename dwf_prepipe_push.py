@@ -15,26 +15,26 @@ def dwf_prepipe_validatefits(file_name,data_dir):
 	valid=0
 	while(not valid):
 		try:
-			test=pyfits.open(data_dir+file_name+'.fits.fz')
-		#except OSError:
-		#	print('OS')
-		#	print(file_name+' still writing ...')
-		#	time.sleep(3)
+			test=pyfits.open(file_name+'.fits.fz')
+		except OSError:
+			print('OS')
+			print(file_name+' still writing ...')
+			time.sleep(3)
 		except UserWarning:
 			print('user')
 			print(file_name+' still writing ...')
 			time.sleep(0.5)
-		#except IOError:
-		#	print('io')
-		#	print(file_name+' still writing ...')
-		#	time.sleep(0.5)
+		except IOError:
+			print('io')
+			print(file_name+' still writing ...')
+			time.sleep(0.5)
 		else:
 			print('pass')
 			valid=1
 
 #Package new raw .fits.fz file 
-def dwf_prepipe_packagefile(file_name,data_dir,Qs):
-	file_name=file_name.split('/')[-1].split('.')[0]
+def dwf_prepipe_packagefile(file,data_dir,Qs):
+	file_name=file.split('/')[-1].split('.')[0]
 	jp2_dir=data_dir+"jp2/"
 	print('Unpacking:'+file_name)
 	print(file_name)
@@ -49,7 +49,9 @@ def dwf_prepipe_packagefile(file_name,data_dir,Qs):
 	subprocess.run(['tar','-cf',jp2_dir+file_name+'.tar','-C',jp2_dir+file_name+'/','.'])
 
 #Parallel Ship file to G2
-def dwf_prepipe_parallel_pushfile(file_name,data_dir):
+def dwf_prepipe_parallel_pushfile(file,data_dir):
+	file_name=file.split('/')[-1].split('.')[0]
+
 	#g2 configuration
 	user='fstars'
 	host='g2.hpc.swin.edu.au'
@@ -65,7 +67,8 @@ def dwf_prepipe_parallel_pushfile(file_name,data_dir):
 	print('Returning to watch directory')
 
 #Serial Ship to g2
-def dwf_prepipe_serial_pushfile(file_name,data_dir):
+def dwf_prepipe_serial_pushfile(file,data_dir):
+	file_name=file.split('/')[-1].split('.')[0]
 	#g2 configuration
 	user='fstars'
 	host='g2.hpc.swin.edu.au'
