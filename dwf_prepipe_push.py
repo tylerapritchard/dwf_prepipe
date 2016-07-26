@@ -116,7 +116,6 @@ while 1:
 	added = [f for f in after if not f in before]
 	removed = [f for f in before if not f in after]
 	
-	print(after)
 	if added: print("Added: ", ", ".join (added))
 	if removed: print("Removed: ", ", ".join (removed))
 	
