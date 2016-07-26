@@ -114,6 +114,7 @@ while 1:
 	after = dict ([(f, None) for f in glob.glob(path_to_watch+'*.fits.fz')])
 	added = [f for f in after if not f in before]
 	removed = [f for f in before if not f in after]
+	
 	if added: print("Added: ", ", ".join (added))
 	if removed: print("Removed: ", ", ".join (removed))
 	
@@ -131,11 +132,12 @@ while 1:
 		dwf_prepipe_serial_pushfile(added[-1],path_to_watch)
 	
 	if ((method == 'b') and added):
-		added.sort()		
-		if(len(added) > nbundle):
-			bundle=added[-1*nbundle:]
+		sortadd=added
+		sortadd.sort()		
+		if(len(sortadd) > nbundle):
+			bundle=sortadd[-1*nbundle:]
 		else:
-			bundle=added
+			bundle=sortadd
 		print(['Bundling:'+str(f) for f in bundle])
 		for f in bundle: 
 			print('Processing: '+f)
