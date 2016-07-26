@@ -15,7 +15,7 @@ def dwf_prepipe_validatefits(file_name,data_dir):
 	valid=0
 	while(not valid):
 		try:
-			test=pyfits.open(file_name+'.fits.fz')
+			test=pyfits.open(file_name)
 		except OSError:
 			print('OS')
 			print(file_name+' still writing ...')
