@@ -79,7 +79,7 @@ def dwf_prepipe_serial_pushfile(file,data_dir):
 	jp2_dir=data_dir+"jp2/"
 
 	print('Shipping:'+jp2_dir+file_name+'.tar')
-	command="time scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"'; rm "+jp2_dir+file_name+".tar "
+	command="scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"'; rm "+jp2_dir+file_name+".tar "
 	subprocess.run(command,shell=True)
 	print('Returning to watch directory')
 
