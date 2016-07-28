@@ -62,7 +62,7 @@ def dwf_prepipe_parallel_pushfile(file,data_dir):
 	jp2_dir=data_dir+"jp2/"
 
 	print('Shipping:'+jp2_dir+file_name+'.tar')
-	command="scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"'"
+	command="time scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"'"
 	subprocess.Popen(command,shell=True)
 	print('Returning to watch directory')
 
@@ -79,9 +79,18 @@ def dwf_prepipe_serial_pushfile(file,data_dir):
 	jp2_dir=data_dir+"jp2/"
 
 	print('Shipping:'+jp2_dir+file_name+'.tar')
-	command="scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"'"
+	command="time scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"'"
 	subprocess.run(command,shell=True)
 	print('Returning to watch directory')
+
+def dwf_prepipe_cleantemp(file,data_dir):
+	file_name=file.split('/')[-1].split('.')[0]
+	jp2_dir=data_dir+"jp2/"+file_name
+	fits_name=file_name+'.fits'
+	#remove funpacked .fits file 
+	os.remove(data_dir+fits_name)
+	#Remove .jp2 files
+	[os.remove(jp2_dir+jp2) for jp2 in os.listdir(jp2_dir+) if f.endswith(".jp2")]
 
 #Input Keyword Default Values
 DWF_PID = "/home4/images/fits/2016A-0095/"
@@ -125,12 +134,14 @@ while 1:
 			dwf_prepipe_validatefits(f,path_to_watch)
 			dwf_prepipe_packagefile(f,path_to_watch,Qs)
 			dwf_prepipe_parallel_pushfile(f,path_to_watch)
+			dwf_prepipe_cleantemp(f,path_to_watch)
 
 	if ((method == 's') and added):
 		dwf_prepipe_validatefits(added[-1],path_to_watch)
 		print('Processing: '+added[-1])
 		dwf_prepipe_packagefile(added[-1],path_to_watch,Qs)
 		dwf_prepipe_serial_pushfile(added[-1],path_to_watch)
+		dwf_prepipe_cleantemp(f,path_to_watch)
 	
 	if ((method == 'b') and added):
 		sortadd=added
@@ -149,6 +160,7 @@ while 1:
 				dwf_prepipe_serial_pushfile(f,path_to_watch)
 			else:
 				dwf_prepipe_parallel_pushfile(f,path_to_watch)
+			dwf_prepipe_cleantemp(f,path_to_watch)
 	
 	before = after
 	time.sleep (1)
