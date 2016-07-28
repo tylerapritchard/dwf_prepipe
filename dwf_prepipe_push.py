@@ -108,7 +108,8 @@ def dwf_prepipe_endofnight(data_dir,exp_min):
 	missing=[f for f in obs_list if not f in sent_files]
 
 	print('Starting end of night transfers for general completion')
-	print('Missing Files:'+missing)
+	print('Missing Files:')
+	print(missing)
 	for f in missing:
 		exp=int(f.split('_')[1])
 		if(exp > exp_min):
