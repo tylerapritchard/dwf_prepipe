@@ -108,12 +108,11 @@ def dwf_prepipe_endofnight(data_dir,exp_min):
 	missing=[f for f in obs_list if not f in sent_files]
 
 	print('Starting end of night transfers for general completion')
-	print('Missing Files:')
-	print(missing)
+	print('Missing Files: '+str(len(missing)+'/'+str(len(obs_list))+' ('+str(len(sent_files)+' sent)'))
+	
 	for f in missing:
 		exp=int(f.split('_')[1])
 		if(exp > exp_min):
-			dwf_prepipe_validatefits(f,path_to_watch)
 			print('Processing: '+f)
 			dwf_prepipe_packagefile(f,path_to_watch,Qs)
 			dwf_prepipe_serial_pushfile(f,path_to_watch)
