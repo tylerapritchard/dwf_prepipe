@@ -62,7 +62,7 @@ def dwf_prepipe_parallel_pushfile(file,data_dir):
 	jp2_dir=data_dir+"jp2/"
 
 	print('Shipping:'+jp2_dir+file_name+'.tar')
-	command="time scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"'"
+	command="time scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"' ; rm "+jp2_dir+file_name+".tar "
 	subprocess.Popen(command,shell=True)
 	print('Returning to watch directory')
 
@@ -79,7 +79,7 @@ def dwf_prepipe_serial_pushfile(file,data_dir):
 	jp2_dir=data_dir+"jp2/"
 
 	print('Shipping:'+jp2_dir+file_name+'.tar')
-	command="time scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"'"
+	command="time scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"'; rm "+jp2_dir+file_name+".tar "
 	subprocess.run(command,shell=True)
 	print('Returning to watch directory')
 
@@ -90,14 +90,40 @@ def dwf_prepipe_cleantemp(file,data_dir):
 	#remove funpacked .fits file 
 	os.remove(data_dir+fits_name)
 	#Remove .jp2 files
-	[os.remove(jp2_dir+jp2) for jp2 in os.listdir(jp2_dir+) if f.endswith(".jp2")]
+	[os.remove(jp2_dir+jp2) for jp2 in os.listdir(jp2_dir) if jp2.endswith(".jp2")]
+
+def dwf_prepipe_endofnight(data_dir,exp_min):
+	user='fstars'
+	host='g2.hpc.swin.edu.au'
+	target_dir='/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/'
+
+	#Get list of files in remote target directory & list of files in local directory
+	remote_list=subprocess.getoutput("ssh "+user+"@"+host+" 'ls "+target_dir+"*.tar'")
+	sent_files=[file.split('/')[-1].split('.')[0] for file in remote_list.splitlines() if file.endswith(".tar")]
+	obs_list=glob.glob(data_dir+'*.fits.fz').split('/')[-1].split('.')[0]
+
+	obs_list.sort(reverse=True)
+	sent_files.sort(reverse=True)
+
+	missing=[f for f in obs_list if not f in sent_files]
+
+	print('Starting end of night transfers for general completion')
+	print('Missing Files:'+missing)
+	for f in missing:
+		exp=int(f.split('_')[1])
+		if(exp > exp_min):
+			dwf_prepipe_validatefits(added[-1],path_to_watch)
+			print('Processing: '+added[-1])
+			dwf_prepipe_packagefile(added[-1],path_to_watch,Qs)
+			dwf_prepipe_serial_pushfile(added[-1],path_to_watch)
+			dwf_prepipe_cleantemp(f,path_to_watch)		
 
 #Input Keyword Default Values
 DWF_PID = "/home4/images/fits/2016A-0095/"
-Qs_Def=0.000038
+Qs_Def=0.00005
 method_def='p'
 nbundle_def=4
-
+exp_min=-1
 #Parse Inputs
 parser = argparse.ArgumentParser(description='DWF_Prepipe push script for raw data from CTIO', formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('-d','--data_dir',metavar='DIRECTORY',type=str,default=DWF_PID,
@@ -105,9 +131,11 @@ parser.add_argument('-d','--data_dir',metavar='DIRECTORY',type=str,default=DWF_P
 parser.add_argument('-q','--Qs',metavar='DIRECTORY',type=float,default=Qs_Def,
 	help='Qstep for fits2jpeg compression')
 parser.add_argument('--method',metavar='PROTOCOL',type=str,default=method_def,
-	help='File Transfer method:(s)erial, (p)arrallel, (b)undle, (l)ist')
+	help='File Transfer method:(s)erial, (p)arrallel, (b)undle, (l)ist, (e)nd of night')
 parser.add_argument('--nbundle',metavar='NUMBER',type=int,default=nbundle_def,
 	help='Number of Files to bundle together')
+parser.add_argument('--exp_min',metavar='NUMBER',type=int,default=exp_min,
+	help='Exposure Number Start for end of night file transfer catchup')
 
 args = parser.parse_args()
 
@@ -118,6 +146,9 @@ nbundle=args.nbundle
 #Begin Monitoring Directory
 print('Monitoring:'+path_to_watch)
 before = dict ([(f, None) for f in glob.glob(path_to_watch+'*.fits.fz')])
+
+if(method == 'e'):
+	dwf_prepipe_endofnight(path_to_watch, exp_min)
 
 while 1:
 
