@@ -105,33 +105,38 @@ def dwf_prepipe_qsubccds(filename_root,qroot,ccds,qsub_path,push_path):
 	qsub_file.close()
 	subprocess.run(['qsub',qsub_name])
 
-DWF_Push = '/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/' #"/lustre/projects/p025_swin/pipes/DWF_PIPE/CTIO_PUSH/"
-
-parser = argparse.ArgumentParser(description='Handle File Ingests for the DWF pipeline', formatter_class=argparse.RawDescriptionHelpFormatter)
-parser.add_argument('--push_dir',metavar='DIRECTORY',type=str,default=DWF_Push,
+def main():
+	DWF_Push = '/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/' #"/lustre/projects/p025_swin/pipes/DWF_PIPE/CTIO_PUSH/"
+	parser = argparse.ArgumentParser(description='Handle File Ingests for the DWF pipeline', formatter_class=argparse.RawDescriptionHelpFormatter)
+	parser.add_argument('--push_dir',metavar='DIRECTORY',type=str,default=DWF_Push,
 	help='Directory where tarballs of compressed files are placed')
-#parser.add_argument('-p', dest='processes', type=int, default=multiprocessing.cpu_count(),
-#	help='Number of processes to plot with (default: #CPU cores)')
-args = parser.parse_args()
+	#parser.add_argument('-p', dest='processes', type=int, default=multiprocessing.cpu_count(),
+	#	help='Number of processes to plot with (default: #CPU cores)')
+	args = parser.parse_args()
 
-path_to_watch = args.push_dir
-path_to_untar = args.push_dir+'untar/'
-path_to_qsub = args.push_dir+'qsub/'
-before = dict ([(f, None) for f in os.listdir (path_to_watch)])
+	path_to_watch = args.push_dir
+	path_to_untar = args.push_dir+'untar/'
+	path_to_qsub = args.push_dir+'qsub/'
+	before = dict ([(f, None) for f in os.listdir (path_to_watch)])
 
-#dwf_prepipe_unpack('DECam_00504110.tar',path_to_watch,path_to_untar,path_to_qsub)
-print('Monitoring Directory:'+path_to_watch)
-while 1:
-  after = dict ([(f, None) for f in os.listdir (path_to_watch)])
-  added = [f for f in after if not f in before]
-  removed = [f for f in before if not f in after]
-  if added: print("Added: ", ", ".join (added))
-  if removed: print("Removed: ", ", ".join (removed))
-  for f in added: 
-  	dwf_prepipe_unpack(f,path_to_watch,path_to_untar,path_to_qsub)
-  before = after
-  time.sleep (5)
+	#dwf_prepipe_unpack('DECam_00504110.tar',path_to_watch,path_to_untar,path_to_qsub)
+	print('Monitoring Directory:'+path_to_watch)
+	while 1:
+		after = dict ([(f, None) for f in os.listdir (path_to_watch)])
+		added = [f for f in after if not f in before]
+		removed = [f for f in before if not f in after]
+		
+		if added: print("Added: ", ", ".join (added))
+		if removed: print("Removed: ", ", ".join (removed))
+		
+		for f in added: 
+			dwf_prepipe_unpack(f,path_to_watch,path_to_untar,path_to_qsub)
+		
+		before = after
+		time.sleep (5)
 
 
+if __name__ == '__main__':
+    main()	
 
 
