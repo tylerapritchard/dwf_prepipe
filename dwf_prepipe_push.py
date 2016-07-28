@@ -44,7 +44,7 @@ def dwf_prepipe_packagefile(file,data_dir,Qs):
 		print('Creating Directory: '+jp2_dir+file_name) 
 		os.makedirs(jp2_dir+file_name)
 	print('Compressing:'+file_name)
-	subprocess.run(['f2j','-i',data_dir+file_name+'.fits','-o',jp2_dir+file_name+'/'+file_name+'.jp2','Qstep='+str(Qs),'-num_threads',str(1)])
+	subprocess.run(['time','f2j','-i',data_dir+file_name+'.fits','-o',jp2_dir+file_name+'/'+file_name+'.jp2','Qstep='+str(Qs),'-num_threads',str(1)])
 	print('Packaging:'+jp2_dir+file_name+'.tar')
 	subprocess.run(['tar','-cf',jp2_dir+file_name+'.tar','-C',jp2_dir+file_name+'/','.'])
 
@@ -62,7 +62,7 @@ def dwf_prepipe_parallel_pushfile(file,data_dir):
 	jp2_dir=data_dir+"jp2/"
 
 	print('Shipping:'+jp2_dir+file_name+'.tar')
-	command="time scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"' ; rm "+jp2_dir+file_name+".tar "
+	command="scp "+jp2_dir+file_name+".tar "+reciever+":"+push_dir+"; ssh "+reciever+" 'mv "+push_dir+file_name+".tar "+target_dir+"' ; rm "+jp2_dir+file_name+".tar "
 	subprocess.Popen(command,shell=True)
 	print('Returning to watch directory')
 
