@@ -100,7 +100,7 @@ def dwf_prepipe_endofnight(data_dir,exp_min):
 	#Get list of files in remote target directory & list of files in local directory
 	remote_list=subprocess.getoutput("ssh "+user+"@"+host+" 'ls "+target_dir+"*.tar'")
 	sent_files=[file.split('/')[-1].split('.')[0] for file in remote_list.splitlines() if file.endswith(".tar")]
-	obs_list=glob.glob(data_dir+'*.fits.fz').split('/')[-1].split('.')[0]
+	obs_list=[f.split('/')[-1].split('.')[0] for f in glob.glob(data_dir+'*.fits.fz')]
 
 	obs_list.sort(reverse=True)
 	sent_files.sort(reverse=True)
