@@ -113,10 +113,10 @@ def dwf_prepipe_endofnight(data_dir,exp_min):
 	for f in missing:
 		exp=int(f.split('_')[1])
 		if(exp > exp_min):
-			dwf_prepipe_validatefits(added[-1],path_to_watch)
-			print('Processing: '+added[-1])
-			dwf_prepipe_packagefile(added[-1],path_to_watch,Qs)
-			dwf_prepipe_serial_pushfile(added[-1],path_to_watch)
+			dwf_prepipe_validatefits(f,path_to_watch)
+			print('Processing: '+f)
+			dwf_prepipe_packagefile(f,path_to_watch,Qs)
+			dwf_prepipe_serial_pushfile(f,path_to_watch)
 			dwf_prepipe_cleantemp(f,path_to_watch)		
 
 #Input Keyword Default Values
