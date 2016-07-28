@@ -88,8 +88,10 @@ def dwf_prepipe_cleantemp(file,data_dir):
 	jp2_dir=data_dir+"jp2/"+file_name
 	fits_name=file_name+'.fits'
 	#remove funpacked .fits file 
+	print('Removing: '+data_dir+fits_name)
 	os.remove(data_dir+fits_name)
 	#Remove .jp2 files
+	print('Cleaning: '+jp2_dir+'/')
 	[os.remove(jp2_dir+'/'+jp2) for jp2 in os.listdir(jp2_dir) if jp2.endswith(".jp2")]
 
 def dwf_prepipe_endofnight(data_dir,exp_min):
@@ -120,7 +122,7 @@ def dwf_prepipe_endofnight(data_dir,exp_min):
 
 #Input Keyword Default Values
 DWF_PID = "/home4/images/fits/2016A-0095/"
-Qs_Def=0.00005
+Qs_Def=0.000055
 method_def='p'
 nbundle_def=4
 exp_min=-1
