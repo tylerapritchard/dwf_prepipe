@@ -120,9 +120,9 @@ def dwf_prepipe_endofnight(data_dir,exp_min):
 		exp=int(f.split('_')[1])
 		if(exp > exp_min):
 			print('Processing: '+f)
-			dwf_prepipe_packagefile(f,path_to_watch,Qs)
-			dwf_prepipe_serial_pushfile(f,path_to_watch)
-			dwf_prepipe_cleantemp(f,path_to_watch)		
+			dwf_prepipe_packagefile(f,data_dir,Qs)
+			dwf_prepipe_serial_pushfile(f,data_dir)
+			dwf_prepipe_cleantemp(f,data_dir)		
 
 def main():
 	#Input Keyword Default Values
