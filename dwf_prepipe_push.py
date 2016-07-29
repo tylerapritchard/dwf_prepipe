@@ -92,8 +92,8 @@ def dwf_prepipe_cleantemp(file,data_dir):
 	print('Removing: '+data_dir+fits_name)
 	os.remove(data_dir+fits_name)
 	#remove excess .tar
-	print('Removing: '+jp2_dir+file_name+'.tar')
-	os.remove(jp2_dir+'.tar')
+	#print('Removing: '+jp2_dir+file_name+'.tar')
+	#os.remove(jp2_dir+'.tar')
 	#Remove .jp2 files
 	print('Cleaning: '+jp2_dir+'/')
 	[os.remove(jp2_dir+'/'+jp2) for jp2 in os.listdir(jp2_dir) if jp2.endswith(".jp2")]
