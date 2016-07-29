@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import os
+import datetime
+import time
 import shutil
 import argparse
 import subprocess
@@ -58,7 +60,14 @@ subprocess.run(['j2f','-i',untar_path+file_name,'-o',uncompressed_fits,'-num_thr
 exp=pyfits.getval(uncompressed_fits,"EXPNUM")
 Field=pyfits.getval(uncompressed_fits,"OBJECT")
 Filter=pyfits.getval(uncompressed_fits,"FILTER")[0]
-ut='ut'+pyfits.getval(uncompressed_fits,"OBSID")[6:12]
+
+#FOR Chile!
+timestamp=datetime.datetime.utcnow().time()
+if(timestamp > datetime.time(22,30)):
+	ut='ut'+str(int(pyfits.getval(uncompressed_fits,"OBSID")[6:12])+1)
+else:
+	ut='ut'+pyfits.getval(uncompressed_fits,"OBSID")[6:12]
+
 obstype=pyfits.getval(uncompressed_fits,"OBSTYPE")
 
 newname=Field+'.'+Filter+'.'+ut+'.'+str(exp)+'_'+ccd_num+'.fits'
