@@ -98,7 +98,7 @@ def dwf_prepipe_cleantemp(file,data_dir):
 	print('Cleaning: '+jp2_dir+'/')
 	[os.remove(jp2_dir+'/'+jp2) for jp2 in os.listdir(jp2_dir) if jp2.endswith(".jp2")]
 
-def dwf_prepipe_endofnight(data_dir,exp_min):
+def dwf_prepipe_endofnight(data_dir,exp_min,Qs):
 	user='fstars'
 	host='g2.hpc.swin.edu.au'
 	target_dir='/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/'
@@ -155,7 +155,7 @@ def main():
 	before = dict ([(f, None) for f in glob.glob(path_to_watch+'*.fits.fz')])
 
 	if(method == 'e'):
-		dwf_prepipe_endofnight(path_to_watch, exp_min)
+		dwf_prepipe_endofnight(path_to_watch, exp_min, Qs)
 		return
 
 	while 1:
