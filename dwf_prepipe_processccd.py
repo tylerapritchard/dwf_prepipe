@@ -67,6 +67,7 @@ if(timestamp > datetime.time(22,30)):
 	ut='ut'+str(int(pyfits.getval(uncompressed_fits,"OBSID")[6:12])+1)
 else:
 	ut='ut'+pyfits.getval(uncompressed_fits,"OBSID")[6:12]
+ut='ut160730'
 
 obstype=pyfits.getval(uncompressed_fits,"OBSTYPE")
 

@@ -126,7 +126,7 @@ def dwf_prepipe_endofnight(data_dir,exp_min,Qs):
 
 def main():
 	#Input Keyword Default Values
-	DWF_PID = "/home4/images/fits/2016A-0095/"
+	DWF_PID = "/home4/images/fits/2016B-0904/"
 	Qs_Def=0.000055
 	method_def='p'
 	nbundle_def=4
