@@ -34,6 +34,7 @@ def main():
 	for ccd in source_subdirs:
 		bias=glob.glob(source_utdir+ccd+'/bias.'+args.input_ut+'.*')
 		flats=glob.glob(source_utdir+ccd+'/domeflat.[a-z].'+args.input_ut+'.*')
+
 		if not os.path.isdir(dest_utdir+ccd+'/'): 
 			print('Creating Directory: '+dest_utdir+ccd+'/')	
 			os.makedirs(dest_utdir+ccd)
