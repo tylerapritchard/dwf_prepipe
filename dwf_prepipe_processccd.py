@@ -13,29 +13,38 @@ os.environ['XDG_CONFIG_HOME']='/home/fstars/.python3_config/'
 import astropy.io.fits as pyfits
 
 def check_wcs(ut,ccd,expnum):
-	pipeloop_out=subprocess.check_output(['pipeview.pl','-red',ut,ccd,'-stage','WCSNON','-id',expnum],stderr=subprocess.STDOUT)
+	pipeloop_out=subprocess.check_output(['pipeview.pl','-red',ut,ccd,'-stage','WCSNON','-id',str(expnum)],stderr=subprocess.STDOUT,universal_newlines=True)
 	wcs_val=pipeloop_out.splitlines()[9].strip(' \t\n\r').split(' ')[-1]
 	return (wcs_val == 'X')
 
-def get_shift_ccd(ut,ccd,Field):
-	pipeview_out=subprocess.check_output(['pipeview.pl','-red',ut,ccd,'-stage','WCSNON','-wcs','-im',Field],stderr=subprocess.STDOUT)
+def get_shift_ccd(ut,ccd,Field,expnum):
+	pipeview_out=subprocess.check_output(['pipeview.pl','-red',ut,ccd,'-stage','WCSNON','-wcs','-im',Field],stderr=subprocess.STDOUT,universal_newlines=True)
 	pipeview_out=pipeview_out.splitlines()[2:]
 
 	rashift=[]
 	decshift=[]
 
+	ra_close=[]
+	dec_close=[]
+
 	for line in pipeview_out:
 		if((line.split()[0].split('.')[0] == Field) and (line.split()[1] == '1')):	#Checks Valid Line
 			rashift.append(float(line.strip(' \t\n\r').split()[5]))
 			decshift.append(float(line.strip(' \t\n\r').split()[6]))
+			line_exp=line.split()[0].split('_')[0].split('.')[-1]
+			if(abs(int(line_exp) - int(expnum)) < 7):
+				ra_close.append(float(line.strip(' \t\n\r').split()[5]))
+				dec_close.append(float(line.strip(' \t\n\r').split()[6]))
 
 	if((len(rashift) == 0) or (len(decshift) == 0)):
 		return [0,0]
+	if((len(ra_close) != 0) or (len(dec_close) != 0)):
+		return[sum(ra_close)/len(ra_close),sum(dec_close)/len(dec_close)]
 	else:
 		return[sum(rashift)/len(rashift),sum(decshift)/len(decshift)]
 
 def get_shift_exp(ut,ccd,exp,Field):
-	pipeview_out=subprocess.check_output(['pipeview.pl','-red',ut,'1-60','-stage','WCSNON','-wcs','-id',exp],stderr=subprocess.STDOUT)
+	pipeview_out=subprocess.check_output(['pipeview.pl','-red',ut,'1-60','-stage','WCSNON','-wcs','-id',exp],stderr=subprocess.STDOUT,universal_newlines=True)
 	pipeview_out=pipeview_out.splitlines()[1:]
 
 	rashift=[]
@@ -50,7 +59,7 @@ def get_shift_exp(ut,ccd,exp,Field):
 			decshift.append(float(line.strip(' \t\n\r').split()[6]))
 			
 			line_ccd=line.split()[0].split('_')[1]
-			if(abs(int(line_ccd) - int(ccd)) < 5):
+			if(abs(int(line_ccd) - int(ccd)) < 3):
 				ra_close.append(float(line.strip(' \t\n\r').split()[5]))
 				dec_close.append(float(line.strip(' \t\n\r').split()[6]))
 
@@ -63,7 +72,7 @@ def get_shift_exp(ut,ccd,exp,Field):
 
 
 def get_shift_field(ut,ccd,exp,Field):
-	pipeview_out=subprocess.check_output(['pipeview.pl','-red',ut,'1-60','-stage','WCSNON','-wcs','-im',Field],stderr=subprocess.STDOUT)
+	pipeview_out=subprocess.check_output(['pipeview.pl','-red',ut,'1-60','-stage','WCSNON','-wcs','-im',Field],stderr=subprocess.STDOUT,universal_newlines=True)
 	pipeview_out=pipeview_out.splitlines()[2:]
 
 	rashift=[]
@@ -78,7 +87,7 @@ def get_shift_field(ut,ccd,exp,Field):
 			decshift.append(float(line.strip(' \t\n\r').split()[6]))
 			
 			line_ccd=line.split()[0].split('_')[1]
-			if(abs(int(line_ccd) - int(ccd)) < 5):
+			if(abs(int(line_ccd) - int(ccd)) < 3):
 				ra_close.append(float(line.strip(' \t\n\r').split()[5]))
 				dec_close.append(float(line.strip(' \t\n\r').split()[6]))
 
@@ -180,20 +189,25 @@ def main():
 
 	#Check WCS, if Bad look for CCD shifts in this CCD, any exposure
 	if(not check_wcs(ut,ccd_num,str(exp))):
-		ra_shift, dec_shift = get_shift_ccd(ut,ccd_num,Field)
+		ra_shift, dec_shift = get_shift_ccd(ut,ccd_num,Field,exp)
+		shifts=str(ra_shift)+','+str(dec_shift)
+		print('Shifts frrom CCD '+ccd_num+' : '+shifts)
 		if((ra_shift != 0) or (dec_shift != 0)):
-			subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-k','WCSNON_RADECSHIFT',str(ra_shift)+','+str(dec_shift),'-redobad'])
-	#Check WCS, if Bad look for CCD shifts in this exposure, any CCD
-	if(not check_wcs(ut,ccd_num,str(exp))):
-		ra_shift, dec_shift = get_shift_exp(ut,ccd_num,str(exp),Field)
-		if((ra_shift != 0) or (dec_shift != 0)):
-			subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-k','WCSNON_RADECSHIFT',str(ra_shift)+','+str(dec_shift),'-redobad'])
-		else:
-			#Desperation: Check WCS, if bad look for shifts in adjacent images any CCD any exposure
-			if(not check_wcs(ut,ccd_num,str(exp),Field)):
-				ra_shift, dec_shift = get_shift_field(ut,ccd_num,Field)
-				if((ra_shift != 0) or (dec_shift != 0)):
-					subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-k','WCSNON_RADECSHIFT',str(ra_shift)+','+str(dec_shift),'-redobad'])
+			subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-stage','FLATTEN,WCSNON','-k','WCSNON_RADECSHIFT',shifts,'-redobad'])
+		#else:
+			#Check WCS, if Bad look for CCD shifts in this exposure, any CCD
+		if(not check_wcs(ut,ccd_num,str(exp))):
+			ra_shift, dec_shift = get_shift_exp(ut,ccd_num,str(exp),Field)
+			shifts=str(ra_shift)+','+str(dec_shift)
+			print('Shifts frrom EXP '+str(exp)+' : '+shifts)
+			if((ra_shift != 0) or (dec_shift != 0)):
+				subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-stage','FLATTEN,WCSNON','-k','WCSNON_RADECSHIFT',shifts,'-redobad'])
+			#else:
+			#	#Desperation: Check WCS, if bad look for shifts in adjacent images any CCD any exposure
+			#	if(not check_wcs(ut,ccd_num,str(exp))):
+			#		ra_shift, dec_shift = get_shift_field(ut,ccd_num,Field)
+			#		if((ra_shift != 0) or (dec_shift != 0)):
+			#			subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-k','WCSNON_RADECSHIFT',str(ra_shift)+','+str(dec_shift),'-redobad'])
 
 
 	#Remove unescessary .jp2
