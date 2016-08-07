@@ -147,12 +147,15 @@ def main():
 	Filter=pyfits.getval(uncompressed_fits,"FILTER")[0]
 
 	#FOR Chile!
+	##FIX THIS.  So the problem is in a night's observations can straddle two different ut's
+	##The initial fits works but doesn't straddle month's, plus since the check is based off of 
+	## CURRENT time NOT observed time it can screw up on reprocessing data.  Fix both of these.  
 	timestamp=datetime.datetime.utcnow().time()
 	if(timestamp > datetime.time(22,30)):
 		ut='ut'+str(int(pyfits.getval(uncompressed_fits,"OBSID")[6:12])+1)
 	else:
 		ut='ut'+pyfits.getval(uncompressed_fits,"OBSID")[6:12]
-	ut='ut160806'
+	ut='ut160807'
 
 	obstype=pyfits.getval(uncompressed_fits,"OBSTYPE")
 
@@ -193,7 +196,9 @@ def main():
 		shifts=str(ra_shift)+','+str(dec_shift)
 		print('Shifts frrom CCD '+ccd_num+' : '+shifts)
 		if((ra_shift != 0) or (dec_shift != 0)):
-			subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-stage','FLATTEN,WCSNON','-k','WCSNON_RADECSHIFT',shifts,'-redobad'])
+			subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-k','WCSNON_RADECSHIFT',shifts,'-redobad'])
+			if(not check_wcs(ut,ccd_num,str(exp))):
+				subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-stage','FLATTEN,WCSNON','-k','WCSNON_RADECSHIFT',shifts,'-k','WCSNON_SEARCHRAD','15','-k','WCSNON_CAT_MAXMAG','14.2','-k','WCSNON_RMSMAX','0.275','-redobad'])
 		#else:
 			#Check WCS, if Bad look for CCD shifts in this exposure, any CCD
 		if(not check_wcs(ut,ccd_num,str(exp))):
@@ -201,7 +206,9 @@ def main():
 			shifts=str(ra_shift)+','+str(dec_shift)
 			print('Shifts frrom EXP '+str(exp)+' : '+shifts)
 			if((ra_shift != 0) or (dec_shift != 0)):
-				subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-stage','FLATTEN,WCSNON','-k','WCSNON_RADECSHIFT',shifts,'-redobad'])
+				subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-k','WCSNON_RADECSHIFT',shifts,'-redobad'])
+				if(not check_wcs(ut,ccd_num,str(exp))):
+					subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-stage','FLATTEN,WCSNON','-k','WCSNON_RADECSHIFT',shifts,'-k','WCSNON_SEARCHRAD','25','-k','WCSNON_CAT_MAXMAG','14.2','-k','WCSNON_RMSMAX','0.275','-redobad'])
 			#else:
 			#	#Desperation: Check WCS, if bad look for shifts in adjacent images any CCD any exposure
 			#	if(not check_wcs(ut,ccd_num,str(exp))):
