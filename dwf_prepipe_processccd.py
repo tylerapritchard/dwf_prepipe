@@ -70,7 +70,6 @@ def get_shift_exp(ut,ccd,exp,Field):
 	else:
 		return[sum(rashift)/len(rashift),sum(decshift)/len(decshift)]
 
-
 def get_shift_field(ut,ccd,exp,Field):
 	pipeview_out=subprocess.check_output(['pipeview.pl','-red',ut,'1-60','-stage','WCSNON','-wcs','-im',Field],stderr=subprocess.STDOUT,universal_newlines=True)
 	pipeview_out=pipeview_out.splitlines()[2:]
@@ -120,8 +119,6 @@ def main():
 			print('Creating Directory: '+local_dir)	
 			os.makedirs(local_dir)
 
-
-
 	photepipe_rawdir= '/projects/p025_swin/pipes/arest/DECAM/DEFAULT/rawdata/'
 	push_dir=args.push_dir
 	untar_path=push_dir+'untar/'
@@ -148,14 +145,14 @@ def main():
 
 	#FOR Chile!
 	##FIX THIS.  So the problem is in a night's observations can straddle two different ut's
-	##The initial fits works but doesn't straddle month's, plus since the check is based off of 
+	##The initial fitx works but doesn't straddle month's, plus since the check is based off of 
 	## CURRENT time NOT observed time it can screw up on reprocessing data.  Fix both of these.  
 	timestamp=datetime.datetime.utcnow().time()
 	if(timestamp > datetime.time(22,30)):
 		ut='ut'+str(int(pyfits.getval(uncompressed_fits,"OBSID")[6:12])+1)
 	else:
 		ut='ut'+pyfits.getval(uncompressed_fits,"OBSID")[6:12]
-	ut='ut160807'
+	#ut='ut160807'
 
 	obstype=pyfits.getval(uncompressed_fits,"OBSTYPE")
 
