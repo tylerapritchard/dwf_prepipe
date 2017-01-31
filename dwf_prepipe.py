@@ -84,11 +84,13 @@ def dwf_prepipe_qsubccds(filename_root,qroot,ccds,qsub_path,push_path):
 	qsub_file.write('cp /home/fstars/.astropy/config/astropy.cfg.good /home/fstars/.astropy/config/astropy.cfg\n')
 	qsub_file.write('cp /home/fstars/.python3_config/astropy/astropy.cfg.good /home/fstars/.python3_config/astropy/astropy.cfg\n')
 	
+	qsub_file.write('csh\n')
+
 	#Create the local directory if its not allready there
 	#and delete everything inside since we're taking a full node
-	qsub_file.write('mkdir /lfs/data0/dwf/\n')
-	qsub_file.write('rm /lfs/data0/dwf/*.jp2\n')
-	qsub_file.write('rm /lfs/data0/dwf/*.fits\n')
+	qsub_file.write('mkdir $PBS_JOBFS/dwf/\n')
+	qsub_file.write('rm $PBS_JOBFS/dwf/*.jp2\n')
+	qsub_file.write('rm $PBS_JOBFS/dwf/*.fits\n')
 	qsub_file.write('echo ------------------------------------------------------\n')
 
 	for f in image_list:	
@@ -98,8 +100,8 @@ def dwf_prepipe_qsubccds(filename_root,qroot,ccds,qsub_path,push_path):
 	qsub_file.write('echo ------------------------------------------------------\n')
 	qsub_file.write('echo Safety Cleanup for the local disk:\n')
 
-	qsub_file.write('rm /lfs/data0/dwf/*.jp2\n')
-	qsub_file.write('rm /lfs/data0/dwf/*.fits\n')
+	qsub_file.write('rm $PBS_JOBFS/dwf/*.jp2\n')
+	qsub_file.write('rm $PBS_JOBFS/dwf/*.fits\n')
 	qsub_file.write('echo ------------------------------------------------------\n')
 
 	qsub_file.close()
