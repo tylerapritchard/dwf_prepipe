@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import os
 import datetime
 import time
@@ -112,7 +111,7 @@ def main():
 	args = parser.parse_args()
 
 	#Set local Directory and check to see if it exists
-	local_dir='/lfs/data0/dwf/'
+	local_dir=os.path.join(os.environ['PBS_JOBFS'],'dwf')
 	local_convert=args.local
 
 	if(local_convert):
@@ -155,7 +154,6 @@ def main():
 		ut='ut'+str(int(pyfits.getval(uncompressed_fits,"OBSID")[6:12])+1)
 	else:
 		ut='ut'+pyfits.getval(uncompressed_fits,"OBSID")[6:12]
-	ut='ut160807'
 
 	obstype=pyfits.getval(uncompressed_fits,"OBSTYPE")
 
