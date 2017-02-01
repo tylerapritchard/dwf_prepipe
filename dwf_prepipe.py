@@ -84,6 +84,7 @@ def dwf_prepipe_qsubccds(filename_root,qroot,ccds,qsub_path,push_path):
 	qsub_file.write('cp /home/fstars/.astropy/config/astropy.cfg.good /home/fstars/.astropy/config/astropy.cfg\n')
 	qsub_file.write('cp /home/fstars/.python3_config/astropy/astropy.cfg.good /home/fstars/.python3_config/astropy/astropy.cfg\n')
 	
+	qsub_file.write('echo $HOST\n')
 	qsub_file.write('csh\n')
 
 	#Create the local directory if its not allready there
