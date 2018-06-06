@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #-W error:"WARNING: File may have been truncated:*""
-#example usage ./dwf_prepipe.py /projects/p025_swin/fstars/DWF_Unpack_Test/push/
+#example usage ./dwf_prepipe.py /fred/oz100/fstars/DWF_Unpack_Test/push/
 import os, time
 import math
 import sys
@@ -32,7 +32,7 @@ def dwf_prepipe_validatefits(file_name,data_dir):
 			print(file_name+' pass!')
 			valid=1
 
-#Package new raw .fits.fz file 
+#Package new raw .fits.fz file
 def dwf_prepipe_packagefile(file,data_dir,Qs):
 	file_name=file.split('/')[-1].split('.')[0]
 	jp2_dir=data_dir+"jp2/"
@@ -40,11 +40,11 @@ def dwf_prepipe_packagefile(file,data_dir,Qs):
 	print(file_name)
 	print(data_dir+file_name+'.fits.fz')
 	subprocess.run(['funpack',data_dir+file_name+'.fits.fz'])
-	if not os.path.isdir(jp2_dir+file_name): 
-		print('Creating Directory: '+jp2_dir+file_name) 
+	if not os.path.isdir(jp2_dir+file_name):
+		print('Creating Directory: '+jp2_dir+file_name)
 		os.makedirs(jp2_dir+file_name)
 	print('Compressing:'+file_name)
-	subprocess.run(['time','f2j','-i',data_dir+file_name+'.fits','-o',jp2_dir+file_name+'/'+file_name+'.jp2','Qstep='+str(Qs),'-num_threads',str(1)])
+	subprocess.run(['time','f2j_DECam','-i',data_dir+file_name+'.fits','-o',jp2_dir+file_name+'/'+file_name+'.jp2','Qstep='+str(Qs),'-num_threads',str(1)])
 	print('Packaging:'+jp2_dir+file_name+'.tar')
 	subprocess.run(['tar','-cf',jp2_dir+file_name+'.tar','-C',jp2_dir+file_name+'/','.'])
 
@@ -54,10 +54,10 @@ def dwf_prepipe_parallel_pushfile(file,data_dir):
 
 	#g2 configuration
 	user='fstars'
-	host='g2.hpc.swin.edu.au'
+	host='ozstar.swin.edu.au'
 	reciever=user+'@'+host
-	push_dir='/lustre/projects/p025_swin/fstars/push/'
-	target_dir='/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/'
+	push_dir='/fred/oz100/fstars/push/'
+	target_dir='/fred/oz100/fstars/DWF_Unpack_Test/push/'
 
 	jp2_dir=data_dir+"jp2/"
 
@@ -71,10 +71,10 @@ def dwf_prepipe_serial_pushfile(file,data_dir):
 	file_name=file.split('/')[-1].split('.')[0]
 	#g2 configuration
 	user='fstars'
-	host='g2.hpc.swin.edu.au'
+	host='ozstar.swin.edu.au'
 	reciever=user+'@'+host
-	push_dir='/lustre/projects/p025_swin/fstars/push/'
-	target_dir='/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/'
+	push_dir='/fred/oz100/fstars/push/'
+	target_dir='/fred/oz100/fstars/DWF_Unpack_Test/push/'
 
 	jp2_dir=data_dir+"jp2/"
 
@@ -88,7 +88,7 @@ def dwf_prepipe_cleantemp(file,data_dir):
 	file_name=file.split('/')[-1].split('.')[0]
 	jp2_dir=data_dir+"jp2/"+file_name
 	fits_name=file_name+'.fits'
-	#remove funpacked .fits file 
+	#remove funpacked .fits file
 	print('Removing: '+data_dir+fits_name)
 	os.remove(data_dir+fits_name)
 	#remove excess .tar
@@ -100,8 +100,8 @@ def dwf_prepipe_cleantemp(file,data_dir):
 
 def dwf_prepipe_endofnight(data_dir,exp_min,Qs):
 	user='fstars'
-	host='g2.hpc.swin.edu.au'
-	target_dir='/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/'
+	host='ozstar.swin.edu.au'
+	target_dir='/fred/oz100/fstars/DWF_Unpack_Test/push/'
 
 	#Get list of files in remote target directory & list of files in local directory
 	remote_list=subprocess.getoutput("ssh "+user+"@"+host+" 'ls "+target_dir+"*.tar'")
@@ -122,7 +122,7 @@ def dwf_prepipe_endofnight(data_dir,exp_min,Qs):
 			print('Processing: '+f)
 			dwf_prepipe_packagefile(f,data_dir,Qs)
 			dwf_prepipe_serial_pushfile(f,data_dir)
-			dwf_prepipe_cleantemp(f,data_dir)		
+			dwf_prepipe_cleantemp(f,data_dir)
 
 def main():
 	#Input Keyword Default Values
@@ -163,12 +163,12 @@ def main():
 		after = dict ([(f, None) for f in glob.glob(path_to_watch+'*.fits.fz')])
 		added = [f for f in after if not f in before]
 		removed = [f for f in before if not f in after]
-	
+
 		if added: print("Added: ", ", ".join (added))
 		if removed: print("Removed: ", ", ".join (removed))
-	
+
 		if ((method == 'p') and added):
-			for f in added: 
+			for f in added:
 				print('Processing: '+f)
 				dwf_prepipe_validatefits(f,path_to_watch)
 				dwf_prepipe_packagefile(f,path_to_watch,Qs)
@@ -181,16 +181,16 @@ def main():
 			dwf_prepipe_packagefile(added[-1],path_to_watch,Qs)
 			dwf_prepipe_serial_pushfile(added[-1],path_to_watch)
 			dwf_prepipe_cleantemp(f,path_to_watch)
-	
+
 		if ((method == 'b') and added):
 			sortadd=added
-			sortadd.sort()		
+			sortadd.sort()
 			if(len(sortadd) > nbundle):
 				bundle=sortadd[-1*nbundle:]
 			else:
 				bundle=sortadd
 			print(['Bundling:'+str(f) for f in bundle])
-			for f in bundle: 
+			for f in bundle:
 				print('Processing: '+f)
 				dwf_prepipe_validatefits(f,path_to_watch)
 				dwf_prepipe_packagefile(f,path_to_watch,Qs)
@@ -200,8 +200,8 @@ def main():
 				else:
 					dwf_prepipe_parallel_pushfile(f,path_to_watch)
 				dwf_prepipe_cleantemp(f,path_to_watch)
-	
+
 		before = after
 		time.sleep (1)
 if __name__ == '__main__':
-    main()	
+    main()

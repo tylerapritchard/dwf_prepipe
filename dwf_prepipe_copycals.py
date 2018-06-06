@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#Copies Calibrations for pipeloop from one directory to another.  
+#Copies Calibrations for pipeloop from one directory to another.
 
 import os
 import shutil
@@ -8,9 +8,9 @@ import argparse
 import subprocess
 
 def main():
-	pipe_dir='/lustre/projects/p025_swin/pipes/arest/DECAM/DEFAULT/rawdata/'
+	pipe_dir='/fred/oz100/fstars/pipes/arest/DECAM/DEFAULT/rawdata/'
 
-	parser = argparse.ArgumentParser(description='Copy Cals for armins pipeline', 
+	parser = argparse.ArgumentParser(description='Copy Cals for armins pipeline',
 		formatter_class=argparse.RawDescriptionHelpFormatter)
 	parser.add_argument('-p','--pipe_dir',metavar='DIRECTORY',type=str,default=pipe_dir,
 		help='Directory where tarballs of compressed files are placed')
@@ -27,20 +27,19 @@ def main():
 	source_subdirs=[name for name in os.listdir(source_utdir)
     	        if os.path.isdir(os.path.join(source_utdir, name))]
 
-	if (not os.path.isdir(dest_utdir)) and source_subdirs: 
-		print('Creating Directory: '+dest_utdir)	
+	if (not os.path.isdir(dest_utdir)) and source_subdirs:
+		print('Creating Directory: '+dest_utdir)
 		os.makedirs(dest_utdir)
 
 	for ccd in source_subdirs:
 		bias=glob.glob(source_utdir+ccd+'/bias.'+args.input_ut+'.*')
 		flats=glob.glob(source_utdir+ccd+'/domeflat.[a-z].'+args.input_ut+'.*')
 
-		if not os.path.isdir(dest_utdir+ccd+'/'): 
-			print('Creating Directory: '+dest_utdir+ccd+'/')	
+		if not os.path.isdir(dest_utdir+ccd+'/'):
+			print('Creating Directory: '+dest_utdir+ccd+'/')
 			os.makedirs(dest_utdir+ccd)
 		for im in bias: shutil.copy(im,dest_utdir+ccd+'/')
 		for im in flats: shutil.copy(im,dest_utdir+ccd+'/')
 
 if __name__ == '__main__':
-	main()	
-    
+	main()

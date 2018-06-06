@@ -10,8 +10,8 @@ import multiprocessing
 import subprocess
 import astropy.io.fits as pyfits
 
-Test_Data_Repository='/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/test_data/'
-Push_Directory='/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/'
+Test_Data_Repository='/fred/oz100/fstars/DWF_Unpack_Test/test_data/'
+Push_Directory='/fred/oz100/fstars/DWF_Unpack_Test/push/'
 
 file_list = os.listdir (Test_Data_Repository)
 n=0

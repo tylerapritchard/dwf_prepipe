@@ -7,9 +7,36 @@ import argparse
 import subprocess
 
 #~/.astropy/config/astropy.cfg was getting messed up - seperate default (used by pipeloop?) and this
-os.environ['XDG_CONFIG_HOME']='/home/fstars/.python3_config/'
+# os.environ['XDG_CONFIG_HOME']='/home/fstars/.python3_config/'
 
 import astropy.io.fits as pyfits
+
+def check_path(path):
+    """Check if path ends with a slash ('/'). Else, it adds a slash.
+
+    The function also creates the directory if it does not existing.
+
+    Parameters
+    ----------
+    path : str
+        A path
+
+    Returns
+    -------
+    path : str
+        A functional path
+    """
+    from os import makedirs
+    from os.path import exists
+
+    if len(path) > 0 and path[-1] != '/':
+        path = path + '/'
+
+    if not exists(path):
+        makedirs(path)
+
+    return path
+
 
 def check_wcs(ut,ccd,expnum):
 	pipeloop_out=subprocess.check_output(['pipeview.pl','-red',ut,ccd,'-stage','WCSNON','-id',str(expnum)],stderr=subprocess.STDOUT,universal_newlines=True)
@@ -56,7 +83,7 @@ def get_shift_exp(ut,ccd,exp,Field):
 		if((line.split()[0].split('.')[0] == Field) and (line.split()[1] == '1')): #Checks Valid Line
 			rashift.append(float(line.strip(' \t\n\r').split()[5]))
 			decshift.append(float(line.strip(' \t\n\r').split()[6]))
-			
+
 			line_ccd=line.split()[0].split('_')[1]
 			if(abs(int(line_ccd) - int(ccd)) < 3):
 				ra_close.append(float(line.strip(' \t\n\r').split()[5]))
@@ -84,7 +111,7 @@ def get_shift_field(ut,ccd,exp,Field):
 		if((line.split()[0].split('.')[0] == Field) and (line.split()[1] == '1')): #Checks Valid Line
 			rashift.append(float(line.strip(' \t\n\r').split()[5]))
 			decshift.append(float(line.strip(' \t\n\r').split()[6]))
-			
+
 			line_ccd=line.split()[0].split('_')[1]
 			if(abs(int(line_ccd) - int(ccd)) < 3):
 				ra_close.append(float(line.strip(' \t\n\r').split()[5]))
@@ -98,7 +125,7 @@ def get_shift_field(ut,ccd,exp,Field):
 		return[sum(rashift)/len(rashift),sum(decshift)/len(decshift)]
 
 def main():
-	DWF_Push = '/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/'
+	DWF_Push = '/fred/oz100/fstars/DWF_Unpack_Test/push/'
 	use_local=1
 
 	parser = argparse.ArgumentParser(description='DWF_Prepipe process for single compressed CCD', formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -111,19 +138,20 @@ def main():
 	args = parser.parse_args()
 
 	#Set local Directory and check to see if it exists
-	local_dir=os.path.join(os.environ['PBS_JOBFS'],'dwf')
+	# local_dir=os.path.join(os.environ['JOBFS'],'dwf')
+	local_dir = '/fred/oz100/fstars/images_test/dwf'
 	local_convert=args.local
 
 	if(local_convert):
-		if not os.path.isdir(local_dir): 
-			print('Creating Directory: '+local_dir)	
+		if not os.path.isdir(local_dir):
+			print('Creating Directory: '+local_dir)
 			os.makedirs(local_dir)
 
 
 
-	photepipe_rawdir= '/projects/p025_swin/pipes/arest/DECAM/DEFAULT/rawdata/'
+	photepipe_rawdir= check_path('/fred/oz100/fstars/pipes/arest/DECAM/DEFAULT/rawdata/')
 	push_dir=args.push_dir
-	untar_path=push_dir+'untar/'
+	untar_path=check_path(push_dir+'untar/')
 
 	file_name=args.input_file
 	DECam_Root=file_name.split('.')[0]
@@ -138,7 +166,7 @@ def main():
 	#Uncompress Fits on local Directory
 	uncompressed_fits=untar_path+DECam_Root+'.fits'
 	print('Uncompressing: '+file_name+' in path: '+untar_path)
-	subprocess.run(['j2f','-i',untar_path+file_name,'-o',uncompressed_fits,'-num_threads',str(1)])
+	subprocess.run(['j2f_DECam','-i',untar_path+file_name,'-o',uncompressed_fits,'-num_threads',str(1)])
 
 	#Extract nescessary information from file for naming scheme
 	exp=pyfits.getval(uncompressed_fits,"EXPNUM")
@@ -147,8 +175,8 @@ def main():
 
 	#FOR Chile!
 	##FIX THIS.  So the problem is in a night's observations can straddle two different ut's
-	##The initial fits works but doesn't straddle month's, plus since the check is based off of 
-	## CURRENT time NOT observed time it can screw up on reprocessing data.  Fix both of these.  
+	##The initial fits works but doesn't straddle month's, plus since the check is based off of
+	## CURRENT time NOT observed time it can screw up on reprocessing data.  Fix both of these.
 	timestamp=datetime.datetime.utcnow().time()
 	if(timestamp > datetime.time(22,30)):
 		ut='ut'+str(int(pyfits.getval(uncompressed_fits,"OBSID")[6:12])+1)
@@ -163,22 +191,22 @@ def main():
 	if((obstype == 'zero') or (obstype == 'bias')):
 		newname='bias.'+ut+'.'+str(exp)+'_'+ccd_num+'.fits'
 
-	ut_dir=photepipe_rawdir+ut+'/'
-	dest_dir=ut_dir+ccd_num+'/'
+	ut_dir=check_path(photepipe_rawdir+ut+'/')
+	dest_dir=check_path(ut_dir+ccd_num+'/')
 
 
 	#Check to see if UT date & CCD Directories have been created
-	if not os.path.isdir(ut_dir): 
-		print('Creating Directory: '+ut_dir)	
+	if not os.path.isdir(ut_dir):
+		print('Creating Directory: '+ut_dir)
 		os.makedirs(ut_dir)
 	else:
 		print('Directory Exists: '+ut_dir)
 
-	if not os.path.isdir(dest_dir): 
-		print('Creating Directory: '+dest_dir)	
+	if not os.path.isdir(dest_dir):
+		print('Creating Directory: '+dest_dir)
 		os.makedirs(dest_dir)
 	else:
-		print('Directory Exists: '+dest_dir)	
+		print('Directory Exists: '+dest_dir)
 
 	#Move Uncompressed Fits File
 	print('Renaming '+file_name+' to '+newname)
@@ -220,4 +248,4 @@ def main():
 	subprocess.run(['rm',untar_path+file_name])
 
 if __name__ == '__main__':
-    main()	
+    main()
