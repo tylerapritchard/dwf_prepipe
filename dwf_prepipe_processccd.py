@@ -149,7 +149,7 @@ def main():
 
 
 
-	photepipe_rawdir= check_path('/fred/oz100/fstars/pipes/arest/DECAM/DEFAULT/rawdata/')
+	photepipe_rawdir= check_path('/fred/oz100/pipes/arest/DECAM/DEFAULT/rawdata/')
 	push_dir=args.push_dir
 	untar_path=check_path(push_dir+'untar/')
 
