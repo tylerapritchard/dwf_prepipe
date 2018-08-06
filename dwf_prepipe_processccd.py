@@ -5,6 +5,7 @@ import time
 import shutil
 import argparse
 import subprocess
+import astropy.io.fits
 
 #~/.astropy/config/astropy.cfg was getting messed up - seperate default (used by pipeloop?) and this
 os.environ['XDG_CONFIG_HOME']='/home/fstars/.python3_config/'
@@ -125,6 +126,10 @@ def main():
 	file_name=args.input_file
 	DECam_Root=file_name.split('.')[0]
 	ccd_num=DECam_Root.split('_')[2]
+	
+	#FOR DANY REPROCESSING ONLY!!!!!, fix a few inconsistencies in directory and naming structure
+	print('/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/untar/NSF2_g_ut160813_'+file_name.split('_')[1]+'/NSF2_g_ut160813_'+file_name.split('_')[1]+'_'+file_name.split('_')[2],'/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/untar/DECam_'+file_name.split('_')[1]+'_'+file_name.split('_')[2])
+	shutil.move('/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/untar/NSF2_g_ut160813_'+file_name.split('_')[1]+'/NSF2_g_ut160813_'+file_name.split('_')[1]+'_'+file_name.split('_')[2],'/lustre/projects/p025_swin/fstars/DWF_Unpack_Test/push/untar/DECam_'+file_name.split('_')[1]+'_'+file_name.split('_')[2])
 
 	if(local_convert):
 		#Move .jp2 to local directory
@@ -151,10 +156,7 @@ def main():
 		ut='ut'+str(int(pyfits.getval(uncompressed_fits,"OBSID")[6:12])+1)
 	else:
 		ut='ut'+pyfits.getval(uncompressed_fits,"OBSID")[6:12]
-<<<<<<< HEAD
-	#ut='ut160807'
-=======
->>>>>>> 4dfbfe9343d0a4a0c4b276afa2f7a9e6ff667e5b
+	ut='ut160813'
 
 	obstype=pyfits.getval(uncompressed_fits,"OBSTYPE")
 
@@ -166,7 +168,7 @@ def main():
 
 	ut_dir=photepipe_rawdir+ut+'/'
 	dest_dir=ut_dir+ccd_num+'/'
-
+	print(dest_dir)
 
 	#Check to see if UT date & CCD Directories have been created
 	if not os.path.isdir(ut_dir): 
@@ -187,7 +189,7 @@ def main():
 	shutil.move(uncompressed_fits,dest_dir+newname)
 
 	#Call Basic DefaultPipeloop for default CCD reduction
-	subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-redobad'])
+	subprocess.run(['pipeloop.pl','-red',ut,ccd_num,'-id',str(exp),'-redo'])
 
 	#Check WCS, if Bad look for CCD shifts in this CCD, any exposure
 	if(not check_wcs(ut,ccd_num,str(exp))):
