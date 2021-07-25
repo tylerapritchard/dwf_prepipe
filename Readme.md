@@ -1,5 +1,5 @@
 # Deeper, Wider, Faster File Ingestion and Calibration Pipeline
-This is the file ingestion, data transfer, and calibration pipeline for the Deeper, Wider, Faster Survey.  Originally written for the use of DECam data and the Swinburne G2 HPC system by Tyler Pritchard, it now also has limited experimental support for the new ozstar HPC cluster as well as the Subaru HSC camera with contributions from Dany Vohl and Nozomu Tominaga.  Use a markdown viewer for best results with this document.  
+This is legacy file ingestion, data transfer, and calibration pipeline for the Deeper, Wider, Faster Survey.  Originally written for the use of DECam data and the Swinburne G2 HPC system by Tyler Pritchard, it now also has limited experimental support for the new ozstar HPC cluster as well as the Subaru HSC camera with contributions from Dany Vohl and Nozomu Tominaga.  Use a markdown viewer for best results with this document.  
 
 ## General Schema
 
